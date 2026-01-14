@@ -1,0 +1,192 @@
+import { app, BrowserWindow, ipcMain, screen } from 'electron';
+import path from 'path';
+import fs from 'fs';
+
+const isDev = process.env.NODE_ENV === 'development';
+const SETTINGS_FILE = path.join(app.getPath('userData'), 'window-settings.json');
+
+interface WindowSettings {
+    x?: number;
+    y?: number;
+    width: number;
+    height: number;
+    isAlwaysOnTop: boolean;
+    isScreenSharePrivate: boolean;
+    backgroundColor: string;
+    opacity: number;
+}
+
+let mainWindow: BrowserWindow | null = null;
+
+function loadWindowSettings(): WindowSettings {
+    try {
+        if (fs.existsSync(SETTINGS_FILE)) {
+            const data = fs.readFileSync(SETTINGS_FILE, 'utf-8');
+            return JSON.parse(data);
+        }
+    } catch (error) {
+        console.error('Error loading window settings:', error);
+    }
+
+    return {
+        width: 1000,
+        height: 700,
+        isAlwaysOnTop: false,
+        isScreenSharePrivate: false,
+        backgroundColor: '#ffffff',
+        opacity: 1.0,
+    };
+}
+
+function saveWindowSettings(settings: Partial<WindowSettings>) {
+    try {
+        const currentSettings = loadWindowSettings();
+        const newSettings = { ...currentSettings, ...settings };
+        fs.writeFileSync(SETTINGS_FILE, JSON.stringify(newSettings, null, 2));
+    } catch (error) {
+        console.error('Error saving window settings:', error);
+    }
+}
+
+function createWindow() {
+    const settings = loadWindowSettings();
+    const primaryDisplay = screen.getPrimaryDisplay();
+    const { width: screenWidth, height: screenHeight } = primaryDisplay.workAreaSize;
+
+    mainWindow = new BrowserWindow({
+        width: settings.width,
+        height: settings.height,
+        x: settings.x,
+        y: settings.y,
+        minWidth: 600,
+        minHeight: 400,
+        maxWidth: screenWidth,
+        maxHeight: screenHeight,
+        frame: false,
+        transparent: false,
+        backgroundColor: settings.backgroundColor,
+        opacity: settings.opacity,
+        alwaysOnTop: settings.isAlwaysOnTop,
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.js'),
+            nodeIntegration: false,
+            contextIsolation: true,
+        },
+        show: false,
+    });
+
+    if (process.platform === 'win32' && settings.isScreenSharePrivate) {
+        mainWindow.setContentProtection(true);
+    }
+
+    if (isDev) {
+        mainWindow.loadURL('http://localhost:5173');
+        mainWindow.webContents.openDevTools();
+    } else {
+        mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
+    }
+
+    mainWindow.once('ready-to-show', () => {
+        mainWindow?.show();
+    });
+
+    mainWindow.on('moved', () => {
+        if (mainWindow) {
+            const [x, y] = mainWindow.getPosition();
+            saveWindowSettings({ x, y });
+        }
+    });
+
+    mainWindow.on('resized', () => {
+        if (mainWindow) {
+            const [width, height] = mainWindow.getSize();
+            saveWindowSettings({ width, height });
+        }
+    });
+
+    mainWindow.on('closed', () => {
+        mainWindow = null;
+    });
+}
+
+app.whenReady().then(() => {
+    createWindow();
+
+    app.on('activate', () => {
+        if (BrowserWindow.getAllWindows().length === 0) {
+            createWindow();
+        }
+    });
+});
+
+app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') {
+        app.quit();
+    }
+});
+
+ipcMain.handle('window:minimize', () => {
+    mainWindow?.minimize();
+});
+
+ipcMain.handle('window:maximize', () => {
+    if (mainWindow?.isMaximized()) {
+        mainWindow.unmaximize();
+    } else {
+        mainWindow?.maximize();
+    }
+});
+
+ipcMain.handle('window:close', () => {
+    mainWindow?.close();
+});
+
+ipcMain.handle('window:isMaximized', () => {
+    return mainWindow?.isMaximized() || false;
+});
+
+ipcMain.handle('window:setAlwaysOnTop', (_event, flag: boolean) => {
+    mainWindow?.setAlwaysOnTop(flag);
+    saveWindowSettings({ isAlwaysOnTop: flag });
+    return flag;
+});
+
+ipcMain.handle('window:getAlwaysOnTop', () => {
+    const settings = loadWindowSettings();
+    return settings.isAlwaysOnTop;
+});
+
+ipcMain.handle('window:setScreenSharePrivacy', (_event, flag: boolean) => {
+    if (process.platform === 'win32' && mainWindow) {
+        mainWindow.setContentProtection(flag);
+        saveWindowSettings({ isScreenSharePrivate: flag });
+        return flag;
+    }
+    return false;
+});
+
+ipcMain.handle('window:getScreenSharePrivacy', () => {
+    const settings = loadWindowSettings();
+    return settings.isScreenSharePrivate;
+});
+
+ipcMain.handle('window:setBackgroundColor', (_event, color: string) => {
+    mainWindow?.setBackgroundColor(color);
+    saveWindowSettings({ backgroundColor: color });
+    return color;
+});
+
+ipcMain.handle('window:setOpacity', (_event, opacity: number) => {
+    mainWindow?.setOpacity(opacity);
+    saveWindowSettings({ opacity });
+    return opacity;
+});
+
+ipcMain.handle('settings:get', () => {
+    return loadWindowSettings();
+});
+
+ipcMain.handle('settings:save', (_event, settings: Partial<WindowSettings>) => {
+    saveWindowSettings(settings);
+    return loadWindowSettings();
+});
