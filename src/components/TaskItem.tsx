@@ -1,8 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle2, Circle, Clock, Flag, Calendar as CalendarIcon, Trash2, Edit } from 'lucide-react';
+import { Edit, Trash2, Clock, PlayCircle } from 'lucide-react';
 import { Task } from '../types';
-import { format, isPast } from 'date-fns';
+import { format } from 'date-fns';
 
 interface TaskItemProps {
     task: Task;
@@ -11,109 +11,95 @@ interface TaskItemProps {
     onDelete: (id: string) => void;
 }
 
-export const TaskItem: React.FC<TaskItemProps> = ({
-    task,
-    onToggle,
-    onEdit,
-    onDelete,
-}) => {
-    const isOverdue = task.dueDate && isPast(new Date(task.dueDate)) && task.status !== 'done';
-
+export const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, onEdit, onDelete }) => {
+    // Priority colors
     const priorityColors = {
-        high: 'text-priority-high border-priority-high',
-        medium: 'text-priority-medium border-priority-medium',
-        low: 'text-priority-low border-priority-low',
-    };
-
-    const statusIcons = {
-        todo: <Circle size={20} />,
-        'in-progress': <Clock size={20} className="text-blue-500" />,
-        done: <CheckCircle2 size={20} className="text-green-500" />,
+        high: 'text-priority-high',
+        medium: 'text-priority-medium',
+        low: 'text-priority-low',
     };
 
     return (
         <motion.div
             layout
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            exit={{ opacity: 0, scale: 0.95 }}
             className={`
-        group p-4 rounded-xl border-2 transition-all cursor-pointer
-        ${task.status === 'done' ? 'bg-gray-50 dark:bg-gray-800/50 opacity-75' : 'bg-white dark:bg-gray-800'}
-        ${priorityColors[task.priority]}
-        hover:shadow-md hover:scale-[1.01]
-      `}
-        >
-            <div className="flex items-start gap-3">
-                {/* Checkbox */}
-                <button
-                    onClick={() => onToggle(task.id)}
-                    className="mt-0.5 flex-shrink-0 hover:scale-110 transition-transform"
-                >
-                    {statusIcons[task.status]}
-                </button>
-
-                {/* Content */}
-                <div className="flex-1 min-w-0">
-                    <h3
-                        className={`
-              text-base font-medium mb-1
-              ${task.status === 'done' ? 'line-through text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-white'}
+                group relative flex items-center gap-4 bg-surface/80 hover:bg-surface 
+                p-4 rounded-2xl border border-white/5 shadow-sm hover:shadow-md transition-all
+                ${task.status === 'done' ? 'opacity-50' : ''}
             `}
-                    >
+        >
+            {/* Checkbox (Circle) */}
+            <button
+                onClick={() => onToggle(task.id)}
+                className={`
+                    w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0
+                    ${task.status === 'done'
+                        ? 'bg-primary border-primary text-background'
+                        : 'border-white/20 hover:border-primary'
+                    }
+                `}
+            >
+                {task.status === 'done' && (
+                    <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="w-2.5 h-2.5 rounded-full bg-background"
+                    />
+                )}
+            </button>
+
+            {/* Content */}
+            <div className="flex-1 min-w-0">
+                <div className="flex justify-between items-start">
+                    <h3 className={`font-medium text-base truncate pr-2 ${task.status === 'done' ? 'line-through text-gray-500' : 'text-gray-200'}`}>
                         {task.title}
                     </h3>
 
-                    {task.description && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
-                            {task.description}
-                        </p>
-                    )}
-
-                    <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-                        {task.dueDate && (
-                            <div className={`flex items-center gap-1 ${isOverdue ? 'text-red-600 dark:text-red-400 font-medium' : ''}`}>
-                                <CalendarIcon size={14} />
-                                {format(new Date(task.dueDate), 'MMM d, yyyy')}
-                            </div>
+                    {/* Tag / Project / Priority */}
+                    <div className="flex items-center gap-2 text-xs">
+                        {task.priority !== 'low' && (
+                            <span className={`font-medium ${priorityColors[task.priority]} px-2 py-1 rounded-lg bg-white/5`}>
+                                {task.priority}
+                            </span>
                         )}
-
-                        <div className="flex items-center gap-1">
-                            <Flag size={14} />
-                            <span className="capitalize">{task.priority}</span>
-                        </div>
-
-                        {task.progress > 0 && task.progress < 100 && (
-                            <div className="flex items-center gap-2">
-                                <div className="w-16 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                                    <div
-                                        className="h-full bg-primary-600 transition-all"
-                                        style={{ width: `${task.progress}%` }}
-                                    />
-                                </div>
-                                <span>{task.progress}%</span>
-                            </div>
-                        )}
+                        <span className="text-gray-500 font-medium px-2 py-1 rounded-lg bg-white/5">
+                            #tasks
+                        </span>
                     </div>
                 </div>
 
-                {/* Actions */}
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                        onClick={() => onEdit(task)}
-                        className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                        title="Edit"
-                    >
-                        <Edit size={16} className="text-gray-600 dark:text-gray-400" />
-                    </button>
-                    <button
-                        onClick={() => onDelete(task.id)}
-                        className="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
-                        title="Delete"
-                    >
-                        <Trash2 size={16} className="text-red-600 dark:text-red-400" />
-                    </button>
+                <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
+                    {task.dueDate && (
+                        <span className="flex items-center gap-1">
+                            <Clock size={12} />
+                            {format(new Date(task.dueDate), 'MMM d, yyyy')}
+                        </span>
+                    )}
+                    {task.description && (
+                        <span className="truncate max-w-[200px] opacity-70">
+                            {task.description}
+                        </span>
+                    )}
                 </div>
+            </div>
+
+            {/* Edit/Delete Actions (Hover only) */}
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 p-1 rounded-lg backdrop-blur-sm -mr-12 group-hover:mr-2">
+                <button
+                    onClick={() => onEdit(task)}
+                    className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                >
+                    <Edit size={16} />
+                </button>
+                <button
+                    onClick={() => onDelete(task.id)}
+                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                >
+                    <Trash2 size={16} />
+                </button>
             </div>
         </motion.div>
     );

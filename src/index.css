@@ -7,6 +7,11 @@
   line-height: 1.5;
   font-weight: 400;
   
+  /* Dynamic Theme Variables (RGB channels for Tailwind) */
+  --primary-color: 251 191 36; /* Amber-400 */
+  --bg-color: 18 18 18; /* Dark Grey */
+  --surface-color: 30 30 30; /* Slightly Lighter Grey */
+  
   color-scheme: light dark;
   
   font-synthesis: none;

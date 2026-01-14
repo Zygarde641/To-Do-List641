@@ -8,18 +8,9 @@ export default {
     theme: {
         extend: {
             colors: {
-                primary: {
-                    50: '#f0f9ff',
-                    100: '#e0f2fe',
-                    200: '#bae6fd',
-                    300: '#7dd3fc',
-                    400: '#38bdf8',
-                    500: '#0ea5e9',
-                    600: '#0284c7',
-                    700: '#0369a1',
-                    800: '#075985',
-                    900: '#0c4a6e',
-                },
+                primary: 'rgb(var(--primary-color) / <alpha-value>)',
+                background: 'rgb(var(--bg-color) / <alpha-value>)',
+                surface: 'rgb(var(--surface-color) / <alpha-value>)',
                 priority: {
                     high: '#ef4444',
                     medium: '#f59e0b',
