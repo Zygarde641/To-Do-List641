@@ -9,9 +9,10 @@ interface TaskItemProps {
     onToggle: (id: string) => void;
     onEdit: (task: Task) => void;
     onDelete: (id: string) => void;
+    onContextMenu?: (e: React.MouseEvent, task: Task) => void;
 }
 
-export const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, onEdit, onDelete }) => {
+export const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, onEdit, onDelete, onContextMenu }) => {
     // Priority colors
     const priorityColors = {
         high: 'text-priority-high',
@@ -25,6 +26,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, onEdit, onDe
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
+            onContextMenu={(e) => onContextMenu?.(e, task)}
             className={`
                 group relative flex items-center gap-4 bg-surface/80 hover:bg-surface 
                 p-4 rounded-2xl border border-white/5 shadow-sm hover:shadow-md transition-all

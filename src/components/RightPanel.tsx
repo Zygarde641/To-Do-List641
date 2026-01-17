@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useTaskStore } from '../store/taskStore';
 
 export const RightPanel: React.FC = () => {
     // Current date logic
@@ -11,6 +12,10 @@ export const RightPanel: React.FC = () => {
     const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
     const calendarDays = Array.from({ length: 28 }, (_, i) => i + 1); // Mock Feb
     const activeDay = 4; // Mock
+
+    const tasks = useTaskStore((state) => state.tasks);
+    const filters = useTaskStore((state) => state.filters);
+    const setFilters = useTaskStore((state) => state.setFilters);
 
     return (
         <div className="h-full flex flex-col bg-background/50 p-6 no-drag">
@@ -33,26 +38,51 @@ export const RightPanel: React.FC = () => {
                     {days.map(d => (
                         <div key={d} className="text-gray-500 font-medium py-2">{d}</div>
                     ))}
-                    {calendarDays.map(d => (
-                        <div
-                            key={d}
-                            className={`
-                                py-2 rounded-full text-gray-300 cursor-pointer hover:bg-white/5 transition-colors
-                                ${d === activeDay ? 'bg-primary text-background font-bold shadow-soft' : ''}
-                            `}
-                        >
-                            {d}
-                        </div>
-                    ))}
+                    {calendarDays.map(d => {
+                        // Find tasks for this day
+                        const dayTasks = tasks.filter(t => {
+                            if (!t.dueDate) return false;
+                            const taskDate = new Date(t.dueDate);
+                            return taskDate.getDate() === d &&
+                                taskDate.getMonth() === today.getMonth() &&
+                                taskDate.getFullYear() === today.getFullYear();
+                        });
+
+                        const hasHigh = dayTasks.some(t => t.priority === 'high');
+                        const hasMedium = dayTasks.some(t => t.priority === 'medium');
+                        const hasLow = dayTasks.some(t => t.priority === 'low');
+
+                        const isSelected = filters.dateRange?.start ===
+                            new Date(currentYear, today.getMonth(), d).toDateString();
+
+                        return (
+                            <div
+                                key={d}
+                                onClick={() => {
+                                    const dateStr = new Date(currentYear, today.getMonth(), d).toDateString();
+                                    setFilters({
+                                        ...filters,
+                                        dateRange: isSelected ? undefined : { start: dateStr, end: dateStr }
+                                    });
+                                }}
+                                className={`
+                                    relative py-2 rounded-full cursor-pointer hover:bg-white/5 transition-colors flex flex-col items-center justify-center
+                                    ${d === activeDay ? 'bg-primary text-background font-bold shadow-soft' : 'text-gray-300'}
+                                    ${isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''}
+                                `}
+                            >
+                                {d}
+                                <div className="flex gap-0.5 mt-0.5">
+                                    {hasHigh && <div className="w-1 h-1 rounded-full bg-red-500" />}
+                                    {!hasHigh && hasMedium && <div className="w-1 h-1 rounded-full bg-yellow-500" />}
+                                    {!hasHigh && !hasMedium && hasLow && <div className="w-1 h-1 rounded-full bg-green-500" />}
+                                </div>
+                            </div>
+                        );
+                    })}
                 </div>
 
-                <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="w-full mt-6 py-2.5 bg-surface text-gray-300 rounded-xl hover:bg-white/5 transition-colors font-medium border border-white/5"
-                >
-                    Show All
-                </motion.button>
+
             </div>
 
             {/* Sort/Filter Widget */}
@@ -62,11 +92,20 @@ export const RightPanel: React.FC = () => {
                     {['None', 'Date', 'Name', 'Tag', 'Priority'].map((item) => (
                         <motion.button
                             key={item}
+                            onClick={() => {
+                                const sortBy = item.toLowerCase() as any;
+                                setFilters({
+                                    ...filters,
+                                    sortBy: sortBy === 'none' ? undefined : sortBy
+                                });
+                            }}
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             className={`
                                 px-4 py-3 rounded-xl font-medium text-sm text-left transition-all
-                                ${item === 'Priority' ? 'bg-primary text-background shadow-lg shadow-primary/20' : 'bg-surface text-gray-400 hover:text-white'}
+                                ${filters.sortBy === item.toLowerCase() || (item === 'None' && !filters.sortBy)
+                                    ? 'bg-primary text-background shadow-lg shadow-primary/20'
+                                    : 'bg-surface text-gray-400 hover:text-white'}
                             `}
                         >
                             {item}

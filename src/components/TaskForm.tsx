@@ -22,6 +22,14 @@ export const TaskForm: React.FC = () => {
             priority: 'medium',
             status: 'todo',
             progress: 0,
+            projectId: (() => {
+                const filters = useTaskStore.getState().filters;
+                // If filtering by exactly one project, assign new tasks to it
+                if (filters.projects && filters.projects.length === 1) {
+                    return filters.projects[0];
+                }
+                return undefined;
+            })(),
         }
     );
 
@@ -69,6 +77,7 @@ export const TaskForm: React.FC = () => {
                 progress: 0,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
+                projectId: formData.projectId, // Ensure project persistence
             };
             addTask(newTask);
         }

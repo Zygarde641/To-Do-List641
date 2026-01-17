@@ -97,6 +97,7 @@ export interface FilterOptions {
         end: string;
     };
     searchQuery?: string;
+    sortBy?: 'date' | 'name' | 'priority' | 'tag';
 }
 
 export type ViewMode = 'list' | 'calendar' | 'kanban' | 'matrix';

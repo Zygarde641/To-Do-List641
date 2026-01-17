@@ -16,6 +16,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     saveSettings: (settings: unknown) => ipcRenderer.invoke('settings:save', settings),
     getNotes: () => ipcRenderer.invoke('notes:get'),
     saveNotes: (notes: unknown) => ipcRenderer.invoke('notes:save', notes),
+    getTasks: () => ipcRenderer.invoke('tasks:get'),
+    saveTasks: (tasks: unknown) => ipcRenderer.invoke('tasks:save', tasks),
 });
 
 export interface ElectronAPI {
@@ -33,6 +35,8 @@ export interface ElectronAPI {
     saveSettings: (settings: unknown) => Promise<unknown>;
     getNotes: () => Promise<any[]>;
     saveNotes: (notes: any[]) => Promise<boolean>;
+    getTasks: () => Promise<any[]>;
+    saveTasks: (tasks: any[]) => Promise<boolean>;
 }
 
 declare global {

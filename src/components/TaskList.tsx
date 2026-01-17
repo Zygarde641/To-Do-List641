@@ -6,9 +6,31 @@ import { useUIStore } from '../store/uiStore';
 import { Task } from '../types';
 import { isToday, isPast } from 'date-fns';
 
+import { ContextMenu, ContextMenuItem, ContextMenuSeparator } from './ContextMenu';
+
 export const TaskList: React.FC = () => {
     const { tasks, searchQuery, filters, setSelectedTask, updateTask, deleteTask } = useTaskStore();
     const { openModal, isFocusMode } = useUIStore();
+
+    // Context Menu State
+    const [contextMenu, setContextMenu] = React.useState<{ x: number; y: number; taskId: string } | null>(null);
+    const [isCreatingList, setIsCreatingList] = React.useState(false);
+    const [newListName, setNewListName] = React.useState('');
+
+    const handleContextMenu = (e: React.MouseEvent, task: Task) => {
+        e.preventDefault();
+        setContextMenu({ x: e.clientX, y: e.clientY, taskId: task.id });
+        setIsCreatingList(false);
+        setNewListName('');
+    };
+
+    const handleMoveToProject = (projectId: string) => {
+        if (contextMenu) {
+            updateTask(contextMenu.taskId, { projectId });
+            setContextMenu(null);
+        }
+    };
+
 
     const filteredTasks = useMemo(() => {
         let filtered = tasks;
@@ -31,6 +53,77 @@ export const TaskList: React.FC = () => {
         // Priority filter
         if (filters.priority && filters.priority.length > 0) {
             filtered = filtered.filter((task) => filters.priority!.includes(task.priority));
+        }
+
+        // Sort Logic
+        if (filters.sortBy) {
+            filtered.sort((a, b) => {
+                switch (filters.sortBy) {
+                    case 'date':
+                        if (!a.dueDate) return 1;
+                        if (!b.dueDate) return -1;
+                        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+                    case 'name':
+                        return a.title.localeCompare(b.title);
+                    case 'priority': {
+                        const priorities = { high: 3, medium: 2, low: 1 };
+                        return (priorities[b.priority] || 0) - (priorities[a.priority] || 0);
+                    }
+                    case 'tag':
+                        // Assuming tags will be implemented later, for now sort by title
+                        return a.title.localeCompare(b.title);
+                    default:
+                        return 0;
+                }
+            });
+        }
+
+        // Filter by Project
+        if (filters.projects && filters.projects.length > 0) {
+            filtered = filtered.filter((task) => task.projectId && filters.projects!.includes(task.projectId));
+        }
+
+        // Filter by Date Range
+        if (filters.dateRange) {
+            const startStr = filters.dateRange.start;
+            const endStr = filters.dateRange.end;
+
+            // Check if specific date filter (start === end)
+            if (startStr && endStr && startStr === endStr) {
+                const filterDate = new Date(startStr);
+                filtered = filtered.filter(task => {
+                    if (!task.dueDate) return false;
+                    const taskDate = new Date(task.dueDate);
+                    return taskDate.getDate() === filterDate.getDate() &&
+                        taskDate.getMonth() === filterDate.getMonth() &&
+                        taskDate.getFullYear() === filterDate.getFullYear();
+                });
+            }
+        }
+
+        // Sort Logic
+        if (filters.sortBy) {
+            filtered.sort((a, b) => {
+                switch (filters.sortBy) {
+                    case 'date':
+                        if (!a.dueDate) return 1;
+                        if (!b.dueDate) return -1;
+                        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+                    case 'name':
+                        return a.title.localeCompare(b.title);
+                    case 'priority': {
+                        const priorities = { high: 3, medium: 2, low: 1 };
+                        return (priorities[b.priority] || 0) - (priorities[a.priority] || 0);
+                    }
+                    case 'tag':
+                        // Sort by Project Name as Tag
+                        const pA = a.projectId || '';
+                        const pB = b.projectId || '';
+                        return pA.localeCompare(pB);
+                    default:
+                        return 0;
+                }
+            });
         }
 
         // Focus mode - show only today's tasks or top 3 priorities
@@ -113,6 +206,7 @@ export const TaskList: React.FC = () => {
                                 onToggle={handleToggle}
                                 onEdit={handleEdit}
                                 onDelete={handleDelete}
+                                onContextMenu={handleContextMenu}
                             />
                         ))}
                     </AnimatePresence>
@@ -144,11 +238,31 @@ export const TaskList: React.FC = () => {
     }
 
     return (
-        <div className="p-6 overflow-y-auto">
-            {renderGroup('Overdue', groupedTasks.overdue, 'text-red-600 dark:text-red-400')}
-            {renderGroup('Today', groupedTasks.today, 'text-blue-600 dark:text-blue-400')}
-            {renderGroup('Upcoming', groupedTasks.upcoming, 'text-green-600 dark:text-green-400')}
-            {renderGroup('No Due Date', groupedTasks['no-date'], 'text-gray-600 dark:text-gray-400')}
+        <div className="p-6 overflow-y-auto overflow-x-hidden min-h-0">
+            {/* If Sorting is Active, Show Flat List */}
+            {filters.sortBy ? (
+                <div className="space-y-2">
+                    <AnimatePresence>
+                        {filteredTasks.filter(t => t.status !== 'done').map((task) => (
+                            <TaskItem
+                                key={task.id}
+                                task={task}
+                                onToggle={handleToggle}
+                                onEdit={handleEdit}
+                                onDelete={handleDelete}
+                                onContextMenu={handleContextMenu}
+                            />
+                        ))}
+                    </AnimatePresence>
+                </div>
+            ) : (
+                <>
+                    {renderGroup('Overdue', groupedTasks.overdue, 'text-red-600 dark:text-red-400')}
+                    {renderGroup('Today', groupedTasks.today, 'text-blue-600 dark:text-blue-400')}
+                    {renderGroup('Upcoming', groupedTasks.upcoming, 'text-green-600 dark:text-green-400')}
+                    {renderGroup('No Due Date', groupedTasks['no-date'], 'text-gray-600 dark:text-gray-400')}
+                </>
+            )}
 
             {/* Completed tasks */}
             {tasks.filter((t) => t.status === 'done').length > 0 && (
@@ -167,11 +281,59 @@ export const TaskList: React.FC = () => {
                                         onToggle={handleToggle}
                                         onEdit={handleEdit}
                                         onDelete={handleDelete}
+                                        onContextMenu={handleContextMenu}
                                     />
                                 ))}
                         </AnimatePresence>
                     </div>
                 </details>
+            )}
+            {/* Context Menu */}
+            {contextMenu && (
+                <ContextMenu
+                    x={contextMenu.x}
+                    y={contextMenu.y}
+                    onClose={() => setContextMenu(null)}
+                >
+                    <div className="text-xs font-semibold text-gray-500 px-3 py-2 uppercase tracking-wide">
+                        Move to List
+                    </div>
+
+                    {/* Existing Lists */}
+                    {['Life', 'Work'].concat(Array.from(new Set(tasks.map(t => t.projectId).filter((id): id is string => !!id && id !== 'Life' && id !== 'Work')))).map(project => (
+                        <ContextMenuItem
+                            key={project}
+                            onClick={() => handleMoveToProject(project)}
+                        >
+                            {project}
+                        </ContextMenuItem>
+                    ))}
+
+                    <ContextMenuSeparator />
+
+                    {/* Create New List */}
+                    {isCreatingList ? (
+                        <div className="px-2 py-1">
+                            <input
+                                autoFocus
+                                type="text"
+                                placeholder="List Name..."
+                                className="w-full bg-black/20 border border-white/10 rounded px-2 py-1 text-sm text-white focus:outline-none focus:border-primary"
+                                value={newListName}
+                                onChange={(e) => setNewListName(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && newListName.trim()) {
+                                        handleMoveToProject(newListName.trim());
+                                    }
+                                }}
+                            />
+                        </div>
+                    ) : (
+                        <ContextMenuItem onClick={() => setIsCreatingList(true)}>
+                            <span className="text-primary">+ Create New List</span>
+                        </ContextMenuItem>
+                    )}
+                </ContextMenu>
             )}
         </div>
     );

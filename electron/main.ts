@@ -5,6 +5,7 @@ import fs from 'fs';
 const isDev = process.env.NODE_ENV === 'development';
 const SETTINGS_FILE = path.join(app.getPath('userData'), 'window-settings.json');
 const NOTES_FILE = path.join(app.getPath('userData'), 'notes.json');
+const TASKS_FILE = path.join(app.getPath('userData'), 'tasks.json');
 
 interface WindowSettings {
     x?: number;
@@ -17,7 +18,7 @@ interface WindowSettings {
     opacity: number;
 }
 
-// NOTE: We treat notes as opaque JSON here. 
+// NOTE: We treat notes/tasks as opaque JSON here.
 // Render process handles structure.
 function loadNotes(): any[] {
     try {
@@ -36,6 +37,26 @@ function saveNotes(notes: any[]) {
         fs.writeFileSync(NOTES_FILE, JSON.stringify(notes, null, 2));
     } catch (error) {
         console.error('Error saving notes:', error);
+    }
+}
+
+function loadTasks(): any[] {
+    try {
+        if (fs.existsSync(TASKS_FILE)) {
+            const data = fs.readFileSync(TASKS_FILE, 'utf-8');
+            return JSON.parse(data);
+        }
+    } catch (error) {
+        console.error('Error loading tasks:', error);
+    }
+    return [];
+}
+
+function saveTasks(tasks: any[]) {
+    try {
+        fs.writeFileSync(TASKS_FILE, JSON.stringify(tasks, null, 2));
+    } catch (error) {
+        console.error('Error saving tasks:', error);
     }
 }
 
@@ -223,5 +244,14 @@ ipcMain.handle('notes:get', () => {
 
 ipcMain.handle('notes:save', (_event, notes: any[]) => {
     saveNotes(notes);
+    return true;
+});
+
+ipcMain.handle('tasks:get', () => {
+    return loadTasks();
+});
+
+ipcMain.handle('tasks:save', (_event, tasks: any[]) => {
+    saveTasks(tasks);
     return true;
 });

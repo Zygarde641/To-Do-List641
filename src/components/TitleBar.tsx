@@ -44,7 +44,9 @@ export const TitleBar: React.FC = () => {
                 <div className="w-6 h-6 bg-white/20 rounded-lg flex items-center justify-center text-xs font-bold">
                     TM
                 </div>
-                <span className="text-sm font-semibold">TaskMaster</span>
+                <span className="text-sm font-semibold">
+                    Task Master <span className="text-primary">641</span>
+                </span>
             </div>
 
             <div className="flex items-center gap-2 no-drag">
