@@ -98,26 +98,22 @@ function createWindow() {
     const { width: screenWidth, height: screenHeight } = primaryDisplay.workAreaSize;
 
     mainWindow = new BrowserWindow({
-        width: settings.width,
-        height: settings.height,
+        width: settings.width || 1200,
+        height: settings.height || 800,
+        minWidth: 800,
+        minHeight: 600,
         x: settings.x,
         y: settings.y,
-        minWidth: 600,
-        minHeight: 400,
-        maxWidth: screenWidth,
-        maxHeight: screenHeight,
         frame: false,
-        transparent: false,
-        backgroundColor: '#121212', // Force dark background to prevent Red Screen
-        // backgroundColor: settings.backgroundColor, // Commented out to debug
-        opacity: settings.opacity,
-        alwaysOnTop: settings.isAlwaysOnTop,
+        show: false, // Don't show until content is loaded
+        backgroundColor: settings.backgroundColor || '#000000',
+        opacity: settings.opacity || 1.0,
+        alwaysOnTop: settings.isAlwaysOnTop || false,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
-            nodeIntegration: false,
             contextIsolation: true,
+            nodeIntegration: false,
         },
-        show: false,
     });
 
     if (process.platform === 'win32' && settings.isScreenSharePrivate) {
