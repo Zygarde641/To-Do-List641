@@ -215,7 +215,7 @@ npm run electron:dev
 
 **Zygarde641**
 - GitHub: [@Zygarde641](https://github.com/Zygarde641)
-- Repository: [To-Do-List641](https://github.com/Zygarde641/To-Do-List641)
+- Repository: [TaskMaster641](https://github.com/Zygarde641/TaskMaster641)
 
 ## 🙏 Acknowledgments
 
