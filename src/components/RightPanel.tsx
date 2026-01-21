@@ -4,14 +4,19 @@ import { useTaskStore } from '../store/taskStore';
 
 export const RightPanel: React.FC = () => {
     // Current date logic
+    // Current date logic
     const today = new Date();
-    const currentMonth = today.toLocaleString('default', { month: 'short' }); // Feb
-    const currentYear = today.getFullYear(); // 2023
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+    const monthName = today.toLocaleString('default', { month: 'short' });
 
-    // Mock calendar grid generation (simple version)
+    // Calculate actual calendar days
+    const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
     const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-    const calendarDays = Array.from({ length: 28 }, (_, i) => i + 1); // Mock Feb
-    const activeDay = 4; // Mock
+    const calendarDays = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+    const activeDay = today.getDate();
 
     const tasks = useTaskStore((state) => state.tasks);
     const filters = useTaskStore((state) => state.filters);
@@ -27,7 +32,7 @@ export const RightPanel: React.FC = () => {
                     </button>
                     <div className="text-center">
                         <div className="text-xl font-bold">{currentYear}</div>
-                        <div className="text-primary font-medium">{currentMonth}</div>
+                        <div className="text-primary font-medium">{monthName}</div>
                     </div>
                     <button className="p-1 hover:bg-white/10 rounded-full transition-colors">
                         <span className="text-gray-400">►</span>
@@ -35,8 +40,12 @@ export const RightPanel: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-7 gap-1 text-center text-sm">
-                    {days.map(d => (
-                        <div key={d} className="text-gray-500 font-medium py-2">{d}</div>
+                    {days.map((d, i) => (
+                        <div key={`${d}-${i}`} className="text-gray-500 font-medium py-2">{d}</div>
+                    ))}
+                    {/* Padding for first day of month */}
+                    {Array.from({ length: firstDayOfMonth }).map((_, i) => (
+                        <div key={`pad-${i}`} />
                     ))}
                     {calendarDays.map(d => {
                         // Find tasks for this day

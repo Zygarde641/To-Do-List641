@@ -27,6 +27,12 @@ function App() {
         const savedTheme = theme || 'system';
         setTheme(savedTheme);
 
+        // RESET STATE ON STARTUP (User Request)
+        // Ensure we start on the home screen with no filters
+        useTaskStore.getState().clearFilters();
+        useUIStore.getState().setActiveView('tasks');
+        useTaskStore.getState().loadTasks();
+
         // Dynamic greeting based on time
         const updateGreeting = () => {
             const hour = new Date().getHours();

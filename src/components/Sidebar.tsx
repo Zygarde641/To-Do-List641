@@ -5,6 +5,7 @@ import { useTaskStore } from '../store/taskStore';
 
 export const Sidebar: React.FC = () => {
     const tasks = useTaskStore((state) => state.tasks);
+    const activeProjects = useTaskStore((state) => state.filters.projects || []);
 
     return (
         <div className="h-full flex flex-col bg-background p-6 border-r border-white/5 no-drag">
@@ -30,7 +31,7 @@ export const Sidebar: React.FC = () => {
                             whileTap={{ scale: 0.98 }}
                             className={`
                                 w-full group flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer transition-all duration-200
-                                ${useTaskStore(s => s.filters.projects?.includes(project!))
+                                ${activeProjects.includes(project)
                                     ? 'bg-primary text-background font-semibold shadow-lg shadow-primary/20'
                                     : 'text-gray-400 hover:bg-white/5 hover:text-white'}
                             `}
