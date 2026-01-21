@@ -211,10 +211,6 @@ npm run electron:dev
 - [ ] Data export/import
 - [ ] Cloud sync (optional)
 
-## 📄 License
-
-MIT License - See LICENSE file
-
 ## 👤 Author
 
 **Zygarde641**
@@ -224,7 +220,3 @@ MIT License - See LICENSE file
 ## 🙏 Acknowledgments
 
 Built with ❤️ using open-source technologies. Special thanks to the Electron, React, and Tailwind communities.
-
----
-
-**Version 2.1.0** - January 2026
