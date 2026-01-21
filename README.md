@@ -16,7 +16,7 @@ A feature-rich desktop productivity application built with Electron, React, Type
 - **Focus Mode** - Shows only today's top 3 priorities
 - **Task Persistence** - Auto-saves to disk with Electron IPC
 
-### 📝 Samsung Notes-Style Editor
+### 📝 Samsung Notes-like Style Editor
 - **Rich Text Editing** - Full Quill.js editor with formatting
 - **Grid View** - Beautiful card-based note organization
 - **Quick Create** - One-click note creation
@@ -49,7 +49,7 @@ A feature-rich desktop productivity application built with Electron, React, Type
 ### Installation
 
 **Option 1: Download Installer (Recommended)**
-1. Download `TaskMaster641 Setup 2.1.0.exe` from releases
+1. Download `TaskMaster641 Setup.exe` from releases
 2. Run installer (creates desktop + start menu shortcuts)
 3. Launch TaskMaster641
 
