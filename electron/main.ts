@@ -127,9 +127,8 @@ function createWindow() {
         mainWindow.loadURL('http://localhost:5173');
         mainWindow.webContents.openDevTools();
     } else {
-        mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
-        // TEMPORARY: Open DevTools in production to debug loading issue
-        mainWindow.webContents.openDevTools();
+        // Production: load from the correct path
+        mainWindow.loadFile(path.join(__dirname, '..', 'index.html'));
     }
 
     mainWindow.on('moved', () => {
