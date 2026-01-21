@@ -94,8 +94,6 @@ function saveWindowSettings(settings: Partial<WindowSettings>) {
 
 function createWindow() {
     const settings = loadWindowSettings();
-    const primaryDisplay = screen.getPrimaryDisplay();
-    const { width: screenWidth, height: screenHeight } = primaryDisplay.workAreaSize;
 
     mainWindow = new BrowserWindow({
         width: settings.width || 1200,
@@ -114,6 +112,11 @@ function createWindow() {
             contextIsolation: true,
             nodeIntegration: false,
         },
+    });
+
+    // Show window only when ready to avoid blank screen
+    mainWindow.once('ready-to-show', () => {
+        mainWindow?.show();
     });
 
     if (process.platform === 'win32' && settings.isScreenSharePrivate) {
