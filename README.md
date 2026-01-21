@@ -1,192 +1,230 @@
-# TaskMaster - Desktop To-Do Application
+# TaskMaster641 - Desktop Productivity Suite
 
-A feature-rich desktop to-do list application built with Electron, React, TypeScript, and Tailwind CSS.
+A feature-rich desktop productivity application built with Electron, React, TypeScript, and Tailwind CSS. TaskMaster641 combines powerful task management with a beautiful notes app, all wrapped in a customizable, privacy-focused interface.
 
-## ✨ Features
+![TaskMaster641](https://img.shields.io/badge/version-2.1.0-blue) ![License](https://img.shields.io/badge/license-MIT-green)
 
-### Window Management
-- ✅ Custom title bar with window controls (minimize, maximize, close)
-- ✅ Always on top functionality
-- ✅ Screen share privacy mode (Windows - hides window during screen sharing)
-- ✅ Draggable and resizable window
-- ✅ Window position and size persistence
+## ✨ Key Features
 
-### Visual Customization
-- ✅ Color picker for background customization
-- ✅ Transparency slider (10-100%)
-- ✅ Dark/Light/System theme support
-- ✅ Smooth animations and transitions
-- ✅ Modern UI with Tailwind CSS
+### 🎯 Advanced Task Management
+- **Smart Lists** - Create custom lists with right-click context menu
+- **Natural Language Dates** - Type "tomorrow at 3 PM" or "next Monday"
+- **Priority System** - High/Medium/Low with visual color coding
+- **Calendar Integration** - Interactive calendar with priority dots
+- **Inline Delete Confirmation** - No more annoying popups - tick/cross UI
+- **Smart Sorting** - Sort by date, name, priority, or tags
+- **Focus Mode** - Shows only today's top 3 priorities
+- **Task Persistence** - Auto-saves to disk with Electron IPC
 
-### Task Management
-- ✅ Create, edit, and delete tasks
-- ✅ Natural language date parsing (e.g., "tomorrow at 3 PM", "next Monday")
-- ✅ Priority levels (High, Medium, Low) with color coding
-- ✅ Task status (To Do, In Progress, Done)
-- ✅ Due dates with overdue detection
-- ✅ Task descriptions
-- ✅ Progress tracking
+### 📝 Samsung Notes-Style Editor
+- **Rich Text Editing** - Full Quill.js editor with formatting
+- **Grid View** - Beautiful card-based note organization
+- **Quick Create** - One-click note creation
+- **Auto-Save** - Never lose your work
+- **Inline Delete** - Tick/cross confirmation for notes too
 
-### Organization
-- ✅ Smart grouping (Overdue, Today, Upcoming, No Date)
-- ✅ Real-time search
-- ✅ Focus mode (shows top 3 priorities or today's tasks)
-- ✅ Collapsible completed tasks section
+### 🪟 Window Management (Anti-Stream Features)
+- **Always On Top** - Pin window above all others
+- **Privacy Mode** - Hides window during screen sharing (Windows)
+- **Custom Opacity** - Draggable slider (20-100%) with smooth circular handle
+- **Frameless Design** - Custom title bar with modern controls
+- **Position Memory** - Remembers size and position
 
-### Keyboard Shortcuts
-- `Ctrl+N` - Create new task
+### 🎨 Visual Customization
+- **Theme Modes** - Light, Dark, and System auto-switching
+- **Background Colors** - Full color picker for personalization
+- **Accent Colors** - Customize highlights and active states
+- **Smooth Animations** - Framer Motion powered transitions
+- **Modern UI** - Glassmorphism and premium design
+
+### ⌨️ Keyboard Shortcuts
+- `Ctrl+N` - New task
 - `Ctrl+F` - Focus search
-- `Ctrl+,` - Open settings
+- `Ctrl+,` - Settings
 - `Space` - Toggle task completion
 - `Escape` - Close modals
 
-## 🚀 Getting Started
-
-### Prerequisites
-- Node.js 18+ and npm
-- Windows OS (for screen share privacy feature)
+## 🚀 Quick Start
 
 ### Installation
 
-1. Navigate to the project directory:
-```bash
-cd "d:\Projects\SDE\To-Do641"
-```
+**Option 1: Download Installer (Recommended)**
+1. Download `TaskMaster641 Setup 2.1.0.exe` from releases
+2. Run installer (creates desktop + start menu shortcuts)
+3. Launch TaskMaster641
 
-2. Install dependencies (already done):
+**Option 2: Build from Source**
+
 ```bash
+# Clone repository
+git clone https://github.com/Zygarde641/To-Do-List641.git
+cd To-Do641
+
+# Install dependencies
 npm install
-```
 
-3. Run in development mode:
-```bash
-npm run dev
-```
+# Run in development
+npm run electron:dev
 
-4. Build for production:
-```bash
+# Build installer
 npm run build:win
+```
+
+### Build Commands
+
+```bash
+# Development (Electron app)
+npm run electron:dev
+
+# Development (Browser only)
+npm run dev
+
+# Build Windows installer
+npm run build:win
+
+# The installer will be in: dist/TaskMaster641 Setup 2.1.0.exe
 ```
 
 ## 📁 Project Structure
 
 ```
 To-Do641/
-├── electron/              # Electron main process
-│   ├── main.ts           # Main process entry
-│   └── preload.ts        # Preload script
+├── electron/
+│   ├── main.ts           # Main process (window, IPC, persistence)
+│   └── preload.ts        # Secure IPC bridge
 ├── src/
-│   ├── components/       # React components
-│   │   ├── ui/          # Reusable UI components
-│   │   ├── TitleBar.tsx # Custom title bar
-│   │   ├── Toolbar.tsx  # Main toolbar
-│   │   ├── TaskList.tsx # Task list view
-│   │   ├── TaskItem.tsx # Individual task
-│   │   ├── TaskForm.tsx # Task creation/editing
-│   │   └── SettingsPanel.tsx
-│   ├── store/           # Zustand state management
-│   │   ├── taskStore.ts # Task state
-│   │   ├── uiStore.ts   # UI state
-│   │   └── dataStore.ts # Tags/Projects
-│   ├── types/           # TypeScript types
-│   ├── App.tsx          # Main app component
-│   ├── main.tsx         # React entry point
-│   └── index.css        # Global styles
-├── package.json
-├── vite.config.ts
-├── tailwind.config.js
-└── index.html
+│   ├── components/
+│   │   ├── Sidebar.tsx   # Dynamic lists with inline delete
+│   │   ├── TaskList.tsx  # Smart grouping & context menu
+│   │   ├── TaskItem.tsx  # Individual task with tick/cross delete
+│   │   ├── NotesView.tsx # Samsung Notes-style editor
+│   │   ├── RightPanel.tsx # Calendar & sort controls
+│   │   ├── TitleBar.tsx  # Custom window controls
+│   │   └── SettingsPanel.tsx # Theme & opacity settings
+│   ├── store/
+│   │   ├── taskStore.ts  # Task state + persistence
+│   │   ├── noteStore.ts  # Notes state + persistence
+│   │   └── uiStore.ts    # Theme, opacity, view state
+│   └── App.tsx           # Main layout
+└── package.json          # Build config with desktop shortcut
 ```
 
 ## 🛠️ Tech Stack
 
-- **Electron** - Desktop app framework
-- **React 18** - UI library
+- **Electron 28** - Desktop framework
+- **React 18** - UI library with hooks
 - **TypeScript** - Type safety
-- **Vite** - Build tool and dev server
-- **Tailwind CSS** - Utility-first CSS
+- **Vite** - Lightning-fast build tool
+- **Tailwind CSS** - Utility-first styling
 - **Framer Motion** - Smooth animations
 - **Zustand** - Lightweight state management
-- **Chrono** - Natural language date parsing
-- **date-fns** - Date utilities
-- **Lucide React** - Beautiful icons
-- **react-colorful** - Color picker
+- **Quill.js** - Rich text editor
+- **Chrono-node** - Natural language dates
+- **Lucide React** - Beautiful icon set
 
-## 🎨 Key Components
+## 🎯 Usage Guide
 
-### Custom Title Bar
-- Frameless window with custom controls
-- Always-on-top toggle
-- Screen share privacy toggle
-- Settings access
+### Creating Tasks
+1. Click "Add Todo" or press `Ctrl+N`
+2. Type title with natural language: "Finish report tomorrow at 3 PM"
+3. Select priority and add description
+4. Task auto-assigns to active list
 
-### Task Management
-- Natural language date input
-- Priority-based color coding
-- Status tracking
-- Smart grouping by due date
+### Managing Lists
+- **Create**: Click "New List" in sidebar or use context menu
+- **Filter**: Click list name to show only those tasks
+- **Delete**: Hover over list → Click X → Confirm with tick
 
-### Settings Panel
-- Theme selection (Light/Dark/System)
-- Background color customization
-- Window opacity control
-- Keyboard shortcuts reference
+### Using the Calendar
+- Click any date to filter tasks for that day
+- Priority dots show: 🔴 High | 🟡 Medium | 🟢 Low
+- Click again to clear filter
 
-## 📝 Usage
-
-### Creating a Task
-1. Click "New Task" or press `Ctrl+N`
-2. Enter task title (try "Finish report tomorrow at 3 PM")
-3. Add description, priority, and other details
-4. Click "Create Task"
-
-### Natural Language Dates
-The app understands phrases like:
-- "tomorrow at 3 PM"
-- "next Monday"
-- "in 3 days"
-- "every week"
-
-### Focus Mode
-Click "Focus Mode" to see only:
-- Today's tasks
-- Top 3 high-priority tasks
+### Notes
+1. Switch to "Notes" tab
+2. Click "Create Note" card
+3. Type title and content with rich formatting
+4. Auto-saves on every change
 
 ### Customization
-1. Click the settings icon in the title bar
-2. Choose your theme
-3. Pick a background color
-4. Adjust window opacity
+1. Click ⚙️ Settings icon
+2. Choose theme (Light/Dark/System)
+3. Pick background color
+4. Drag opacity slider (20-100%)
+5. Click "Done"
 
-## 🔧 Troubleshooting
+## � Privacy Features
 
-### Vite Server Not Starting
-If `npm run dev` doesn't start the server:
-1. Delete `node_modules` and `package-lock.json`
-2. Run `npm install` again
-3. Try `npm run dev`
+- **Anti-Stream Mode** - Window hides during screen sharing
+- **Always On Top** - Control when app is visible
+- **Local Storage** - All data stays on your machine
+- **No Telemetry** - Zero tracking or analytics
 
-### Electron Window Not Showing
-- Check if port 5173 is available
-- Look for errors in the terminal
-- Try running `npx vite` separately to test the React app
+## 📦 Building the Installer
 
-## 🚧 Future Enhancements
+The installer is configured with:
+- Desktop shortcut creation
+- Start menu shortcut
+- Custom install directory option
+- Uninstaller
 
-- [ ] SQLite database integration
-- [ ] Tags and projects
+```json
+"build": {
+  "appId": "com.taskmaster.desktop",
+  "productName": "TaskMaster641",
+  "nsis": {
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true
+  }
+}
+```
+
+## � Troubleshooting
+
+**Blank screen on startup?**
+- App now auto-resets to home screen on launch
+- Clear filters if stuck: Settings → Reset
+
+**Dev server not starting?**
+```bash
+rm -rf node_modules package-lock.json
+npm install
+npm run electron:dev
+```
+
+**Build failing?**
+- Ensure Node.js 16+ is installed
+- Check TypeScript compilation: `npx tsc`
+- Clear Vite cache: `rm -rf dist dist-electron`
+
+## �️ Roadmap
+
+- [x] Task persistence
+- [x] Notes app
+- [x] Calendar integration
+- [x] Inline delete confirmation
+- [x] Draggable opacity slider
 - [ ] Subtasks
 - [ ] Recurring tasks
-- [ ] Calendar view
 - [ ] Kanban board view
 - [ ] Desktop notifications
 - [ ] Data export/import
-- [ ] Pomodoro timer
+- [ ] Cloud sync (optional)
 
 ## 📄 License
 
-MIT
+MIT License - See LICENSE file
 
 ## 👤 Author
 
-Your Name
+**Zygarde641**
+- GitHub: [@Zygarde641](https://github.com/Zygarde641)
+- Repository: [To-Do-List641](https://github.com/Zygarde641/To-Do-List641)
+
+## 🙏 Acknowledgments
+
+Built with ❤️ using open-source technologies. Special thanks to the Electron, React, and Tailwind communities.
+
+---
+
+**Version 2.1.0** - January 2026

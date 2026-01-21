@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Edit, Trash2, Clock } from 'lucide-react';
+import { Edit, Trash2, Clock, Check, X } from 'lucide-react';
 import { Task } from '../types';
 import { format } from 'date-fns';
 
@@ -13,6 +13,7 @@ interface TaskItemProps {
 }
 
 export const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, onEdit, onDelete, onContextMenu }) => {
+    const [confirmDelete, setConfirmDelete] = useState(false);
     // Priority colors
     const priorityColors = {
         high: 'text-priority-high',
@@ -90,18 +91,42 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, onEdit, onDe
 
             {/* Edit/Delete Actions (Hover only) */}
             <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 p-1 rounded-lg backdrop-blur-sm -mr-12 group-hover:mr-2">
-                <button
-                    onClick={() => onEdit(task)}
-                    className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-                >
-                    <Edit size={16} />
-                </button>
-                <button
-                    onClick={() => onDelete(task.id)}
-                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
-                >
-                    <Trash2 size={16} />
-                </button>
+                {!confirmDelete ? (
+                    <>
+                        <button
+                            onClick={() => onEdit(task)}
+                            className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                        >
+                            <Edit size={16} />
+                        </button>
+                        <button
+                            onClick={() => setConfirmDelete(true)}
+                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                        >
+                            <Trash2 size={16} />
+                        </button>
+                    </>
+                ) : (
+                    <div className="flex gap-1">
+                        <button
+                            onClick={() => {
+                                onDelete(task.id);
+                                setConfirmDelete(false);
+                            }}
+                            className="p-2 text-green-400 hover:text-green-300 hover:bg-green-500/10 rounded-lg transition-colors"
+                            title="Confirm Delete"
+                        >
+                            <Check size={16} />
+                        </button>
+                        <button
+                            onClick={() => setConfirmDelete(false)}
+                            className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                            title="Cancel"
+                        >
+                            <X size={16} />
+                        </button>
+                    </div>
+                )}
             </div>
         </motion.div>
     );

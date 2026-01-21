@@ -184,9 +184,7 @@ export const TaskList: React.FC = () => {
     };
 
     const handleDelete = (id: string) => {
-        if (confirm('Are you sure you want to delete this task?')) {
-            deleteTask(id);
-        }
+        deleteTask(id);
     };
 
     const renderGroup = (title: string, tasks: Task[], color: string) => {

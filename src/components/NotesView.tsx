@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { useNoteStore } from '../store/noteStore';
-import { Plus, ArrowLeft, MoreVertical, Search, Trash2 } from 'lucide-react';
+import { Plus, ArrowLeft, MoreVertical, Search, Trash2, Check, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
 
 export const NotesView: React.FC = () => {
     const { notes, activeNoteId, loadNotes, addNote, updateNote, deleteNote, setActiveNote } = useNoteStore();
     const [viewMode, setViewMode] = useState<'grid' | 'editor'>('grid');
+    const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null);
 
     useEffect(() => {
         loadNotes();
@@ -95,15 +96,37 @@ export const NotesView: React.FC = () => {
                                         {format(new Date(note.updatedAt), 'MMM d, h:mm a')}
                                     </div>
 
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            if (confirm('Delete note?')) deleteNote(note.id);
-                                        }}
-                                        className="absolute top-2 right-2 p-1.5 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 hover:bg-red-500 hover:text-white transition-all text-gray-300 backdrop-blur-sm"
-                                    >
-                                        <Trash2 size={14} />
-                                    </button>
+                                    {deletingNoteId === note.id ? (
+                                        <div className="absolute top-2 right-2 flex gap-1" onClick={(e) => e.stopPropagation()}>
+                                            <button
+                                                onClick={() => {
+                                                    deleteNote(note.id);
+                                                    setDeletingNoteId(null);
+                                                }}
+                                                className="p-1.5 bg-green-500/80 rounded-full hover:bg-green-500 text-white transition-all backdrop-blur-sm"
+                                                title="Confirm Delete"
+                                            >
+                                                <Check size={14} />
+                                            </button>
+                                            <button
+                                                onClick={() => setDeletingNoteId(null)}
+                                                className="p-1.5 bg-black/40 rounded-full hover:bg-white/20 text-gray-300 transition-all backdrop-blur-sm"
+                                                title="Cancel"
+                                            >
+                                                <X size={14} />
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setDeletingNoteId(note.id);
+                                            }}
+                                            className="absolute top-2 right-2 p-1.5 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 hover:bg-red-500 hover:text-white transition-all text-gray-300 backdrop-blur-sm"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    )}
                                 </motion.div>
                             ))}
                         </div>
